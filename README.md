@@ -180,7 +180,6 @@ daily_totals = transactions.groupby('date', as_index=False)['sales_value'].sum()
 daily_totals['is_holiday_season'] = daily_totals['date'].dt.month.isin([11,12])
 
 comparison = daily_totals.groupby('is_holiday_season')['sales_value'].mean()
-print(comparison)
 
 lift_pct = (comparison[True] / comparison[False] - 1) * 100
 
