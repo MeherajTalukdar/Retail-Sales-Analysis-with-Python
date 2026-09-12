@@ -175,13 +175,24 @@ monthly
 Compared average daily revenue in November–December against the rest of the year to quantify the size of the holiday season lift.
 
 ```python
-transactions['month'] = transactions['date'].dt.month
-daily_totals = transactions.groupby('date', as_index=False)['sales_value'].sum()
-daily_totals['is_holiday_season'] = daily_totals['date'].dt.month.isin([11,12])
+daily_sales = transactions.groupby('date')[['sales_value']].sum().reset_index()
+daily_sales = daily_sales.assign(
+    month=lambda x: x['date'].dt.month,
+    is_holiday_season=lambda x: np.where(x['month'].isin([11, 12]), 'Nov-Dec', 'Rest of Year')
+)
+seasonal_comparison = (
+    daily_sales.groupby('is_holiday_season')[['sales_value']]
+    .mean()
+    .rename(columns={'sales_value': 'avg_daily_sales'})
+)
+seasonal_comparison
 
-comparison = daily_totals.groupby('is_holiday_season')['sales_value'].mean()
+nov_dec_avg = seasonal_comparison.loc['Nov-Dec', 'avg_daily_sales']
+rest_avg = seasonal_comparison.loc['Rest of Year', 'avg_daily_sales']
 
-lift_pct = (comparison[True] / comparison[False] - 1) * 100
+pct_lift = (nov_dec_avg - rest_avg) / rest_avg * 100
+pct_lift
+
 
 ```
 
