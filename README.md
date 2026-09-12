@@ -64,11 +64,10 @@ transactions = transactions.drop_duplicates(
 
 Checked the proportion of missing `quantity` values; rows dropped rather than imputed, since the missing rate was under 1% with no evident pattern by store or product, so dropping loses negligible signal versus guessing a value that would distort `sales_value`.
 
-```python
-print(f"Missing quantity: {transactions['quantity'].isna().sum()} of {len(transactions)}")
-
-# <1% missing and no obvious pattern by store/product → drop rather than guess a quantity
+```
 transactions = transactions.dropna(subset=['quantity']).reset_index(drop=True)
+
+transactions
 ```
 
 **3. Recompute sales_value and flag mismatches**
