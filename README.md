@@ -46,18 +46,12 @@ marketing_spend['week_start'] = pd.to_datetime(marketing_spend['week_start'])
 
 Identified duplicate rows using a business-key subset rather than `transaction_id`, since two rows can share a distinct ID and still represent the same double-logged sale.
 
-```python
-# check first — don't blindly drop
-dupe_mask = transactions.duplicated(
-    subset=['date','store_id','product_id','quantity','unit_price','discount_pct'],
-    keep=False
-)
-print(f"Duplicate rows found: {dupe_mask.sum()}")
-
+```
 transactions = transactions.drop_duplicates(
     subset=['date','store_id','product_id','quantity','unit_price','discount_pct'],
     keep='first'
 ).reset_index(drop=True)
+transactions
 ```
 
 **2. Handle missing quantity**
@@ -74,7 +68,7 @@ transactions
 
 Recalculated `sales_value` as `quantity × unit_price × (1 − discount_pct)` and compared against the stored value, treating the recomputed value as the source of truth.
 
-```python
+```
 transactions['sales_value_check'] = (
     transactions['quantity'] * transactions['unit_price'] * (1 - transactions['discount_pct'])
 ).round(2)
@@ -82,10 +76,12 @@ transactions['sales_value_check'] = (
 mismatches = transactions[
     (transactions['sales_value'] - transactions['sales_value_check']).abs() > 0.01
 ]
-print(f"Mismatched rows: {len(mismatches)}")
 
 transactions['sales_value'] = transactions['sales_value_check']
 transactions = transactions.drop(columns='sales_value_check')
+
+transactions
+
 ```
 
 ### B. Joins
@@ -117,7 +113,7 @@ weekly_sales = transactions.groupby('week_start', as_index=False)['sales_value']
 weekly = weekly_sales.merge(marketing_spend, on='week_start', how='inner')
 
 correlation = weekly['sales_value'].corr(weekly['marketing_spend'])
-print(f"Correlation: {correlation:.3f}")
+
 ```
 
 `how='inner'` is used here rather than `left` — if a week exists in transactions but `marketing_spend` doesn't have that exact Monday (edge weeks at the start/end of the dataset), NaNs would distort the correlation calculation.
