@@ -99,7 +99,6 @@ category_by_type = tx_full.groupby(['store_type','category'], as_index=False)['s
 best_per_type = category_by_type.loc[
     category_by_type.groupby('store_type')['sales_value'].idxmax()
 ]
-print(best_per_type)
 ```
 
 **5. Marketing spend vs. weekly sales correlation**
