@@ -1,0 +1,9 @@
+store_id,city,store_type
+1,Cologne,Mall
+2,Frankfurt,Mall
+3,Hamburg,Flagship
+4,Frankfurt,Mall
+5,Frankfurt,Flagship
+6,Munich,Standalone
+7,Hamburg,Standalone
+8,Hamburg,Flagship
