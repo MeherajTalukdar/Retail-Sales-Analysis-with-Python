@@ -132,7 +132,7 @@ category_summary = tx_cost.groupby('category', as_index=False).agg(
     total_margin=('margin','sum')
 )
 category_summary['margin_pct'] = (category_summary['total_margin'] / category_summary['total_revenue'] * 100).round(1)
-print(category_summary.sort_values('total_revenue', ascending=False))
+category_summary.sort_values('total_revenue', ascending=False
 ```
 
 **7. Most volatile store (coefficient of variation)**
@@ -144,7 +144,6 @@ daily_store_sales = transactions.groupby(['store_id','date'], as_index=False)['s
 
 volatility = daily_store_sales.groupby('store_id')['sales_value'].agg(['mean','std'])
 volatility['cv'] = volatility['std'] / volatility['mean']
-print(volatility.sort_values('cv', ascending=False))
 ```
 
 **8. Top 3 products by revenue, per store**
@@ -157,7 +156,7 @@ top3_per_store = (
     .groupby('store_id')
     .head(3)
 )
-print(top3_per_store)
+top3_per_store
 ```
 
 ### D. Time Series
@@ -168,7 +167,7 @@ print(top3_per_store)
 monthly = transactions.set_index('date').resample('ME')['sales_value'].sum().reset_index()
 monthly['mom_pct_change'] = monthly['sales_value'].pct_change() * 100
 monthly['yoy_pct_change'] = monthly['sales_value'].pct_change(12) * 100
-print(monthly)
+monthly
 ```
 
 **10. Seasonal spike validation**
@@ -184,7 +183,7 @@ comparison = daily_totals.groupby('is_holiday_season')['sales_value'].mean()
 print(comparison)
 
 lift_pct = (comparison[True] / comparison[False] - 1) * 100
-print(f"Nov/Dec daily average is {lift_pct:.1f}% higher than the rest of the year")
+
 ```
 
 **11. 7-day rolling average and outlier days**
@@ -198,8 +197,7 @@ daily_totals['diff_from_rolling'] = daily_totals['sales_value'] - daily_totals['
 
 best_day = daily_totals['diff_from_rolling'].idxmax()
 worst_day = daily_totals['diff_from_rolling'].idxmin()
-print(f"Best day relative to trend: {best_day}, diff: {daily_totals.loc[best_day,'diff_from_rolling']:.2f}")
-print(f"Worst day relative to trend: {worst_day}, diff: {daily_totals.loc[worst_day,'diff_from_rolling']:.2f}")
+
 ```
 
 ### E. Capstone
@@ -220,7 +218,7 @@ rev_pivot = store_year_rev.pivot(index='store_id', columns='year', values='sales
 rev_pivot['yoy_growth_pct'] = (rev_pivot[2024] - rev_pivot[2023]) / rev_pivot[2023] * 100
 
 worst_2 = rev_pivot.sort_values('yoy_growth_pct').head(2)
-print(worst_2)
+worst_2
 ```
 
 *Stage 2: Check for a category mix problem*
@@ -235,7 +233,7 @@ category_mix_worst = category_mix[category_mix['store_id'].isin(worst_ids)]
 
 # turn each category into a % share of that store-year's total, to compare shift over time
 category_mix_worst['pct_of_store_year'] = category_mix_worst.groupby(['store_id','year'])['sales_value'].transform(lambda x: x / x.sum() * 100)
-print(category_mix_worst.sort_values(['store_id','year','pct_of_store_year'], ascending=[True,True,False]))
+category_mix_worst.sort_values(['store_id','year','pct_of_store_year'], ascending=[True,True,False]
 ```
 
 *Stage 3: Check for a marketing spend problem*
@@ -249,7 +247,7 @@ discount_behavior = transactions[transactions['store_id'].isin(worst_ids)].group
     avg_discount=('discount_pct','mean'),
     pct_transactions_discounted=('discount_pct', lambda x: (x > 0).mean() * 100)
 )
-print(discount_behavior)
+discount_behavior
 ```
 
 A sharp rise in `avg_discount` or `pct_transactions_discounted` from 2023→2024 for these stores would indicate stable unit sales but eroded price/margin — a real driver of weak revenue growth even without a volume drop. Comparing these figures against the company-wide average distinguishes a store-specific issue from a general trend.
